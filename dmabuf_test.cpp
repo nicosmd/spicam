@@ -280,6 +280,17 @@ int main() {
     return 1;
   }
 
+  struct v4l2_buffer displayed_buf;
+  displayed_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+  displayed_buf.memory = V4L2_MEMORY_DMABUF;
+  displayed_buf.reserved2 = 0;
+  displayed_buf.reserved = 0;
+  displayed_buf.length = 1;
+  if (ioctl(enc_fd, VIDIOC_DQBUF, &displayed_buf) == -1) {
+    perror("Dequeue displayed encoded frame");
+    return 1;
+  }
+
   std::cout << "Got encoded frame!" << std::endl;
 
   if (ioctl(enc_fd, VIDIOC_STREAMOFF, &enc_type)) {
