@@ -291,7 +291,12 @@ int main() {
     return 1;
   }
 
+
   std::cout << "Got encoded frame!" << std::endl;
+
+  std::ofstream outfile("output.h264", std::ios::binary | std::ios::app);
+  outfile.write((char *)enc_buffer, enc_result_buffer.bytesused); // Save encoded frame
+  outfile.close();
 
   if (ioctl(enc_fd, VIDIOC_STREAMOFF, &enc_type)) {
     perror("Stop streaming");
