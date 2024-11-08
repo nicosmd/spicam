@@ -122,25 +122,15 @@ int main() {
     return 1;
   }
 
-  struct pollfd pfds[1];
+ // struct pollfd pfds[1];
 
-  pfds[0].fd = cam_fd;
-  pfds[0].events = POLLIN;
+ // pfds[0].fd = cam_fd;
+ // pfds[0].events = POLLIN;
 
   int loop_count = 0;
   struct v4l2_buffer buf;
   int buf_index;
 
-  /* dequeue a buffer */
-  memset(&buf, 0, sizeof(buf));
-  buf.memory = V4L2_MEMORY_DMABUF;
-  buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  std::cout << "try to poll" << std::endl;
-  if (ioctl(cam_fd, VIDIOC_DQBUF, &buf)) {
-    printf("VIDIOC_DQBUF: %s\n", strerror(errno));
-  }
-
-  buf_index = buf.index;
 
   std::cout << "Got an image! Buffer index: " << buf_index << std::endl;
 
@@ -231,24 +221,6 @@ int main() {
     perror("mmap");
   }
 
-  struct v4l2_plane planes;
-
-  struct v4l2_buffer enc_buf;
-  memset(&enc_buf, 0, sizeof(enc_buf));
-  enc_buf.index = 0;
-  enc_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-  enc_buf.memory = V4L2_MEMORY_DMABUF;
-  memset(&planes, 0, sizeof(planes));
-  enc_buf.m.planes = &planes;
-  enc_buf.length = 1;
-  enc_buf.m.planes[0].m.fd =
-      dmabufs_fd[buf_index]; // Pass the DMABUF file descriptor
-
-  if (ioctl(enc_fd, VIDIOC_QBUF, &enc_buf) == -1) {
-    perror("Queueing encoder buffer");
-    return 1;
-  }
-
   int enc_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
   if (ioctl(enc_fd, VIDIOC_STREAMON, &enc_type)) {
     perror("Enc Output Start streaming");
@@ -263,41 +235,83 @@ int main() {
     return 1;
   }
 
-  struct v4l2_plane enc_result_planes;
-  struct v4l2_buffer enc_result_buf;
-  memset(&enc_buf, 0, sizeof(enc_buf));
-  enc_result_buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-  enc_result_buffer.memory = V4L2_MEMORY_MMAP;
-  enc_result_buffer.index = 0;
-  enc_result_buffer.reserved2 = 0;
-  enc_result_buffer.reserved = 0;
-  memset(&enc_result_planes, 0, sizeof(enc_result_planes));
-  enc_result_buffer.m.planes = &enc_result_planes;
-  enc_result_buffer.length = 1;
+  for (int i = 0; i < 2; i++) {
 
-  if (ioctl(enc_fd, VIDIOC_DQBUF, &enc_result_buffer) == -1) {
-    perror("Retrieving encoded frame");
-    return 1;
+    /* dequeue a buffer */
+    memset(&buf, 0, sizeof(buf));
+    buf.memory = V4L2_MEMORY_DMABUF;
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    std::cout << "try to poll" << std::endl;
+    if (ioctl(cam_fd, VIDIOC_DQBUF, &buf)) {
+      printf("VIDIOC_DQBUF: %s\n", strerror(errno));
+    }
+
+    buf_index = buf.index;
+
+    struct v4l2_plane planes;
+
+    struct v4l2_buffer enc_buf;
+    memset(&enc_buf, 0, sizeof(enc_buf));
+    enc_buf.index = 0;
+    enc_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+    enc_buf.memory = V4L2_MEMORY_DMABUF;
+    memset(&planes, 0, sizeof(planes));
+    enc_buf.m.planes = &planes;
+    enc_buf.length = 1;
+    enc_buf.m.planes[0].m.fd =
+        dmabufs_fd[buf_index]; // Pass the DMABUF file descriptor
+
+    if (ioctl(enc_fd, VIDIOC_QBUF, &enc_buf) == -1) {
+      perror("Queueing encoder buffer");
+      return 1;
+    }
+
+    struct v4l2_plane enc_result_planes;
+    struct v4l2_buffer enc_result_buf;
+    memset(&enc_buf, 0, sizeof(enc_buf));
+    enc_result_buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    enc_result_buffer.memory = V4L2_MEMORY_MMAP;
+    enc_result_buffer.index = 0;
+    enc_result_buffer.reserved2 = 0;
+    enc_result_buffer.reserved = 0;
+    memset(&enc_result_planes, 0, sizeof(enc_result_planes));
+    enc_result_buffer.m.planes = &enc_result_planes;
+    enc_result_buffer.length = 1;
+
+    if (ioctl(enc_fd, VIDIOC_DQBUF, &enc_result_buffer) == -1) {
+      perror("Retrieving encoded frame");
+      return 1;
+    }
+
+    struct v4l2_buffer displayed_buf;
+    displayed_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+    displayed_buf.memory = V4L2_MEMORY_DMABUF;
+    displayed_buf.reserved2 = 0;
+    displayed_buf.reserved = 0;
+    displayed_buf.length = 1;
+    if (ioctl(enc_fd, VIDIOC_DQBUF, &displayed_buf) == -1) {
+      perror("Dequeue displayed encoded frame");
+      return 1;
+    }
+
+    std::cout << "test" << std::endl;
+   struct v4l2_buffer requeue_buf;
+   requeue_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+   requeue_buf.memory = V4L2_MEMORY_DMABUF;
+   requeue_buf.index = buf_index;
+   requeue_buf.m.fd = dmabufs_fd[buf_index];
+    if (ioctl(cam_fd, VIDIOC_QBUF, &requeue_buf)) {
+      perror("Requeueing DMABUF");
+      return 1;
+    }
+
+    std::cout << "Got encoded frame!" << std::endl;
+
+    std::ofstream outfile("output.h264", std::ios::binary | std::ios::app);
+    outfile.write((char *)enc_buffer,
+                  enc_result_buffer.bytesused); // Save encoded frame
+    outfile.close();
   }
-
-  struct v4l2_buffer displayed_buf;
-  displayed_buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-  displayed_buf.memory = V4L2_MEMORY_DMABUF;
-  displayed_buf.reserved2 = 0;
-  displayed_buf.reserved = 0;
-  displayed_buf.length = 1;
-  if (ioctl(enc_fd, VIDIOC_DQBUF, &displayed_buf) == -1) {
-    perror("Dequeue displayed encoded frame");
-    return 1;
-  }
-
-
-  std::cout << "Got encoded frame!" << std::endl;
-
-  std::ofstream outfile("output.h264", std::ios::binary | std::ios::app);
-  outfile.write((char *)enc_buffer, enc_result_buffer.bytesused); // Save encoded frame
-  outfile.close();
-
   if (ioctl(enc_fd, VIDIOC_STREAMOFF, &enc_type)) {
     perror("Stop streaming");
 
