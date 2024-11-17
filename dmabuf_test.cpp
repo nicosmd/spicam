@@ -326,33 +326,6 @@ BufferInfo dequeue_buffer(int fd, std::uint32_t buffer_type, std::uint32_t memor
 }
 
 std::uint32_t dequeue_buffer_mplane(int fd, std::uint32_t buffer_type, std::uint32_t memory_type) {
-    // if (buffer_type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
-    //     pollfd pfd = {
-    //         .fd = fd,
-    //         .events = POLLOUT | POLLWRNORM
-    //     };
-    //
-    //
-    //     for (;;) {
-    //         auto ret = poll(&pfd, 1, 1000);
-    //         if (ret > 0)
-    //             break;
-    //         if (errno == EINTR)
-    //             continue;
-    //         throw DeviceFileError{"This shout not be reached"};
-    //     }
-    //
-    //     if (pfd.revents & POLLERR) {
-    //         throw DeviceFileError{"Something went wrong!"};
-    //     }
-    //
-    //     if(pfd.revents & POLLOUT | POLLWRNORM) {
-    //         PLOGD << "Polling successful";
-    //     }
-    //
-    // }
-
-
     v4l2_plane planes = {};
     v4l2_buffer buf = {};
     buf.type = buffer_type;
@@ -436,7 +409,7 @@ auto cam_capture_to_encoder(const DeviceFileHandle &cam_device, const DeviceFile
 
     enc_device.do_file_operation([&dma_bufs, image_buffer_info](int fd) {
         queue_dma_buffer_mplane(fd, dma_bufs[image_buffer_info.index], V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE,
-                                image_buffer_info, image_buffer_info.index);
+                                image_buffer_info, 0);
     });
 
     PLOG_INFO << "Queued image dmabuf to encoding device output plane";
@@ -501,7 +474,7 @@ void do_encoding() {
 
     // Step 8: Request encoder buffers
     enc_device.do_file_operation([](int fd) {
-        request_buffers(fd, 8, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, V4L2_MEMORY_DMABUF);
+        request_buffers(fd, 1, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, V4L2_MEMORY_DMABUF);
     });
 
 
@@ -531,26 +504,9 @@ void do_encoding() {
 
     PLOG_INFO << "Encoding device turned streams on";
 
-    enc_device.do_file_operation([](int fd) {
-        for (int i = 0; i < NUM_BUFS; i++) {
-            log_buffer_status(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE, i);
-        }
-        for (int i = 0; i < NUM_BUFS; i++) {
-            log_buffer_status(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, i);
-        }
-    });
-
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 10; i++) {
         auto image_buffer_info = cam_capture_to_encoder(cam_device, enc_device, dma_bufs);
 
-        enc_device.do_file_operation([](int fd) {
-            for (int i = 0; i < NUM_BUFS; i++) {
-                log_buffer_status(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE, i);
-            }
-            for (int i = 0; i < NUM_BUFS; i++) {
-                log_buffer_status(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, i);
-            }
-        });
         PLOG_INFO << "run [" << i << "]: " << "Queued image dmabuf to encoding device output plane";
 
         enc_device.do_file_operation([](int fd) {
@@ -558,14 +514,6 @@ void do_encoding() {
         });
 
         PLOG_INFO << "run [" << i << "]: " << "Dequeued encoding device output buffer";
-        enc_device.do_file_operation([](int fd) {
-            for (int i = 0; i < NUM_BUFS; i++) {
-                log_buffer_status(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE, i);
-            }
-            for (int i = 0; i < NUM_BUFS; i++) {
-                log_buffer_status(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, i);
-            }
-        });
 
 
         auto encoded_capture_buf_index = enc_device.do_file_operation([](int fd) {
@@ -587,6 +535,7 @@ void do_encoding() {
         });
 
         PLOG_INFO << "run [" << i << "]: " << "Camera device image dmabuf requeued";
+
     }
 
     enc_device.do_file_operation(stream_off_capture_mplane);
