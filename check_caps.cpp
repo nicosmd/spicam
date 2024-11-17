@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2024 Nico Schmidt
+//
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>

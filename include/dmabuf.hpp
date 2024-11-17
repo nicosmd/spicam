@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2024 Nico Schmidt
+//
 
 #ifndef DMABUF_H_
 #define DMABUF_H_

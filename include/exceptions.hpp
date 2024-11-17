@@ -1,5 +1,5 @@
 //
-// Created by nico on 11/16/24.
+// Copyright (c) 2024 Nico Schmidt
 //
 
 #ifndef EXCEPTIONS_HPP

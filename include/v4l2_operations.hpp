@@ -1,5 +1,5 @@
 //
-// Created by nico on 11/17/24.
+// Copyright (c) 2024 Nico Schmidt
 //
 
 #ifndef V4L2_OPERATIONS_HPP

@@ -1,7 +1,3 @@
-//
-// Created by nico on 11/17/24.
-//
-
 /**
  * This file was derived from https://github.com/emfend/dmabuf-v4l2-demo/blob/main/dmabuf.h using the following license:
  *

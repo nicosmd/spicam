@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2024 Nico Schmidt
+//
+
 #include "v4l2_streamer.hpp"
 
 int main() {

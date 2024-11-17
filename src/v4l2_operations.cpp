@@ -1,5 +1,5 @@
 //
-// Created by nico on 11/17/24.
+// Copyright (c) 2024 Nico Schmidt
 //
 
 #include "v4l2_operations.hpp"
