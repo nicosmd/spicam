@@ -1,0 +1,3 @@
+add_executable(h264filestreamer h264filestreamer.cpp)
+
+target_link_libraries(h264filestreamer PRIVATE v4l2_utils)

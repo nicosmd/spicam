@@ -16,19 +16,18 @@ set(SOURCE_HEADER
         include/device_file_handle.hpp
         include/dmabuf.hpp
         include/exceptions.hpp
+        include/v4l2_streamer.hpp
+        include/buffer_info.hpp
+        include/v4l2_operations.hpp
 )
 
 target_sources(v4l2_utils PRIVATE
         src/dmabuf.cpp
+        src/v4l2_streamer.cpp
+        src/v4l2_operations.cpp
         ${SOURCE_HEADER}
 )
 
 set_property(TARGET v4l2_utils PROPERTY CXX_STANDARD 23)
 
-#add_executable(h264streamer main.cpp)
-#
-#add_executable(check_caps check_caps.cpp)
-
-add_executable(dmabuf_test dmabuf_test.cpp)
-
-target_link_libraries(dmabuf_test PRIVATE v4l2_utils)
+add_subdirectory(apps)

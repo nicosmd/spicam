@@ -40,6 +40,14 @@ int DmaBuf::get_fd() const {
     return m_fd;
 }
 
+void * DmaBuf::get_map() const {
+    return m_map;
+}
+
+std::size_t DmaBuf::get_size() const {
+    return m_size;
+}
+
 DmaBuf::~DmaBuf() {
     munmap(m_map, m_size);
 }
