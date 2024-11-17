@@ -96,7 +96,6 @@ void V4L2Streamer::start_streaming() const {
     PLOGD << "Encoding capture stream turned on";
 }
 
-
 void V4L2Streamer::next_frame() {
     auto image_buffer_info = m_camera.do_file_operation([](int fd) {
         return dequeue_buffer(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE, V4L2_MEMORY_DMABUF);
@@ -116,7 +115,6 @@ void V4L2Streamer::next_frame() {
     m_encoder.do_file_operation([](int fd) {
         dequeue_buffer_mplane(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, V4L2_MEMORY_DMABUF);
     });
-
 
     auto encoded_capture_buf_index = m_encoder.do_file_operation([](int fd) {
         return dequeue_buffer_mplane(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE, V4L2_MEMORY_DMABUF);

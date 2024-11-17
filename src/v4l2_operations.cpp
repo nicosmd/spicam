@@ -257,6 +257,7 @@ std::uint32_t dequeue_buffer_mplane(int fd, std::uint32_t buffer_type, std::uint
         PLOGE << "Buffered got an error while dequeueing";
     }
 
+    PLOGD << "Dequeued file descriptor: " << buf.m.planes[0].m.fd;
     PLOGD << "Dequeued buffer index: " << buf.index;
     PLOGD << "Dequeued buffer bytesused: " << buf.m.planes[0].bytesused;
     PLOGD << "Dequeued buffer field: " << buf.field;

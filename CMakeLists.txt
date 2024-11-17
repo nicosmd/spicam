@@ -25,6 +25,7 @@ target_sources(v4l2_utils PRIVATE
         src/dmabuf.cpp
         src/v4l2_streamer.cpp
         src/v4l2_operations.cpp
+        src/dmabuf_operations.cpp
         ${SOURCE_HEADER}
 )
 
