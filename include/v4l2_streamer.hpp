@@ -11,6 +11,15 @@
 
 
 class V4L2Streamer {
+public:
+    enum class Status {
+        Initialized,
+        Streaming,
+        Done
+    };
+
+private:
+    Status status{Status::Initialized};
     std::size_t m_width;
     std::size_t m_height;
     DeviceFileHandle m_camera;
@@ -21,7 +30,7 @@ class V4L2Streamer {
 public:
     V4L2Streamer(const std::string &camera_device_path, std::size_t width, std::size_t height);
 
-    void start_streaming() const;
+    void start_streaming();
 
     void next_frame();
 

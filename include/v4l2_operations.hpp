@@ -38,6 +38,7 @@ BufferInfo dequeue_buffer(int fd, std::uint32_t buffer_type, std::uint32_t memor
 
 std::uint32_t dequeue_buffer_mplane(int fd, std::uint32_t buffer_type, std::uint32_t memory_type);
 
+void log_enum_fmt(int fd, std::uint32_t buffer_type);
 
 void stream_on(int fd, std::uint32_t buffer_type);
 

@@ -21,8 +21,6 @@ V4L2Streamer::V4L2Streamer(const std::string &camera_device_path, std::size_t wi
     static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender;
     plog::init(plog::debug, &consoleAppender);
 
-    PLOG_INFO << "Opening camera";
-
     PLOG_INFO << "Camera device opened";
 
     auto cam_fmt = m_camera.do_file_operation(set_camera_format);
@@ -82,7 +80,7 @@ V4L2Streamer::V4L2Streamer(const std::string &camera_device_path, std::size_t wi
     PLOG_INFO << "Encoding device capture buffer queried";
 }
 
-void V4L2Streamer::start_streaming() const {
+void V4L2Streamer::start_streaming() {
     m_camera.do_file_operation(stream_on_capture);
 
     PLOGD << "Camera capture stream turned on";
@@ -94,6 +92,8 @@ void V4L2Streamer::start_streaming() const {
     m_encoder.do_file_operation(stream_on_capture_mplane);
 
     PLOGD << "Encoding capture stream turned on";
+
+    status = Status::Streaming;
 }
 
 void V4L2Streamer::next_frame() {
@@ -135,8 +135,11 @@ void V4L2Streamer::next_frame() {
 }
 
 V4L2Streamer::~V4L2Streamer() {
-    m_encoder.do_file_operation(stream_off_capture_mplane);
-    m_encoder.do_file_operation(stream_off_output_mplane);
-    m_camera.do_file_operation(stream_off_capture);
+    if (status == Status::Streaming || status == Status::Done) {
+        m_encoder.do_file_operation(stream_off_capture_mplane);
+        m_encoder.do_file_operation(stream_off_output_mplane);
+        m_camera.do_file_operation(stream_off_capture);
+    }
+
     PLOGD << "Streams stopped";
 }

@@ -173,7 +173,7 @@ void queue_dma_buffer_mplane(int fd, const DmaBuf &dma_buf, std::uint32_t buffer
 }
 
 void queue_dma_buffer_mplane(int fd, const DmaBuf &dma_buf, std::uint32_t buffer_tye, const BufferInfo &info,
-    std::uint32_t index) {
+                             std::uint32_t index) {
     PLOGD << "Queue dma buffer mplane " << index;
 
     log_buffer_status(fd, buffer_tye, index);
@@ -263,6 +263,32 @@ std::uint32_t dequeue_buffer_mplane(int fd, std::uint32_t buffer_type, std::uint
     PLOGD << "Dequeued buffer field: " << buf.field;
 
     return buf.index;
+}
+
+void log_enum_fmt(int fd, std::uint32_t buffer_type) {
+    v4l2_fmtdesc fmt = {};
+    fmt.type = buffer_type;
+
+    bool end_reached = false;
+
+    int index = 0;
+
+    do {
+        fmt.index = index;
+        if (ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1) {
+            if (errno != EINVAL) {
+                PLOGE << "Failed to enumerate format";
+                throw DeviceFileError{"Failed to enumerate format"};
+            } else {
+                end_reached = true;
+            }
+        } else {
+            PLOGD << "ioctl: VIDIOC_ENUM_FMT" << "\n"
+                  << "      Type: " << fmt.type << "\n\n"
+                  << "      [" << index << "]: " << fmt.pixelformat << "(" << fmt.description << ")";
+        }
+        index++;
+    } while (!end_reached);
 }
 
 void stream_on(int fd, std::uint32_t buffer_type) {
