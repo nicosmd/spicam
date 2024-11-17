@@ -98,6 +98,10 @@ int main(int argc, char** argv) {
     else {
       std::cout << "dmabuf supported!" << std::endl;
     }
+
+    if(test_dmabuf_req.capabilities & V4L2_BUF_CAP_SUPPORTS_DMABUF) {
+        std::cout << "dmabuf really supported" << std::endl;
+    }
     close(device_fd);
     
 }
