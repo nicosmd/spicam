@@ -1,16 +1,5 @@
 [requires]
-opencv/4.10.0
 plog/1.1.10
-
-[options]
-opencv*:with_webp=False
-opencv*:with_tiff=False
-opencv*:with_ffmpeg=False
-opencv*:with_wayland=False
-opencv*:with_openexr=False
-opencv*:with_protobuf=False
-opencv*:with_flatbuffers=False
-opencv*:with_quirc=False
 
 [generators]
 CMakeToolchain

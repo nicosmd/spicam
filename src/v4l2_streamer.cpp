@@ -37,7 +37,7 @@ V4L2Streamer::V4L2Streamer(const std::string &camera_device_path, std::size_t wi
 
     PLOG_INFO << "DMA buffers allocated";
 
-    /* enque dmabufs into v4l2 device */
+    /* enqueue dmabufs into v4l2 device */
     m_camera.do_file_operation([this](int fd) {
         queue_dma_buffer(fd, m_camera_capture_buffers, V4L2_BUF_TYPE_VIDEO_CAPTURE);
     });
@@ -102,7 +102,6 @@ void V4L2Streamer::next_frame() {
     });
 
     PLOG_INFO << "Got an Image buffer index: " << image_buffer_info.index;
-
 
     m_encoder.do_file_operation([this, image_buffer_info](int fd) {
         queue_dma_buffer_mplane(fd, m_camera_capture_buffers[image_buffer_info.index],

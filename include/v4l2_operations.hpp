@@ -19,7 +19,7 @@ v4l2_format set_encoding_format_capture(int fd);
 void set_encoding_frame_interval(int fd);
 
 
-void request_buffers(int fd, std::uint32_t number_buffers, int buffer_tye, int memory_type);
+void request_buffers(int fd, std::uint32_t number_buffers, std::uint32_t buffer_tye, std::uint32_t memory_type);
 
 void queue_dma_buffer(int fd, const DmaBuf &dma_buf, std::uint32_t buffer_type, std::uint32_t index);
 

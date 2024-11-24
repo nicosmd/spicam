@@ -81,7 +81,7 @@ void set_encoding_frame_interval(int fd) {
             stream_parm.parm.output.timeperframe.denominator << std::endl;
 }
 
-void request_buffers(int fd, std::uint32_t number_buffers, int buffer_tye, int memory_type) {
+void request_buffers(int fd, std::uint32_t number_buffers, std::uint32_t buffer_tye, std::uint32_t memory_type) {
     v4l2_requestbuffers cam_req = {};
     cam_req.count = number_buffers;
     cam_req.type = buffer_tye;

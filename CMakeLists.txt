@@ -19,6 +19,8 @@ set(SOURCE_HEADER
         include/v4l2_streamer.hpp
         include/buffer_info.hpp
         include/v4l2_operations.hpp
+        include/v4l2_video_buffer.hpp
+        include/condition.hpp
 )
 
 target_sources(v4l2_utils PRIVATE
@@ -26,6 +28,7 @@ target_sources(v4l2_utils PRIVATE
         src/v4l2_streamer.cpp
         src/v4l2_operations.cpp
         src/dmabuf_operations.cpp
+        src/v4l2_video_buffer.cpp
         ${SOURCE_HEADER}
 )
 
