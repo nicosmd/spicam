@@ -21,6 +21,8 @@ set(SOURCE_HEADER
         include/v4l2_operations.hpp
         include/v4l2_video_buffer.hpp
         include/condition.hpp
+        include/requeing_package.hpp
+        include/indexed_queue.hpp
 )
 
 target_sources(v4l2_utils PRIVATE

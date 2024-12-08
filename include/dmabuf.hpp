@@ -16,6 +16,25 @@ class DmaBuf {
 public:
     DmaBuf(int heap_fd, size_t size, const std::string &name = {});
 
+    DmaBuf(const DmaBuf &other) = delete;
+
+    DmaBuf(DmaBuf &&other) noexcept
+        : m_fd(other.m_fd),
+          m_map(other.m_map),
+          m_size(other.m_size) {
+    }
+
+    DmaBuf & operator=(const DmaBuf &other) = delete;
+
+    DmaBuf & operator=(DmaBuf &&other) noexcept {
+        if (this == &other)
+            return *this;
+        m_fd = other.m_fd;
+        m_map = other.m_map;
+        m_size = other.m_size;
+        return *this;
+    }
+
     [[nodiscard]] int get_fd() const;
 
     [[nodiscard]] void *get_map() const;
