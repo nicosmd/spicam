@@ -26,22 +26,22 @@ public:
         : m_value(std::move(other.m_value)),
           m_queue(std::move(other.m_queue)) {
         m_is_empty = other.m_is_empty;
-        other.m_is_empty = false;
+        other.m_is_empty = true;
     }
 
-    RequeingPackage &operator=(const RequeingPackage &other) = delete;
+    auto operator=(const RequeingPackage &other) -> RequeingPackage & = delete;
 
-    RequeingPackage &operator=(RequeingPackage &&other) noexcept {
+    auto operator=(RequeingPackage &&other) noexcept -> RequeingPackage & {
         if (this == &other)
             return *this;
         m_value = std::move(other.m_value);
         m_queue = std::move(other.m_queue);
         m_is_empty = other.m_is_empty;
-        other.m_is_empty = false;
+        other.m_is_empty = true;
         return *this;
     }
 
-    bool is_empty() const { return m_is_empty; }
+    auto is_empty() const -> bool { return m_is_empty; }
 
 private:
     class PackageBuilder {
@@ -51,13 +51,13 @@ private:
         explicit PackageBuilder(T &&value) : m_underConstruction{std::forward<T>(value)} {
         }
 
-        PackageBuilder &with_queue(IIndexedQueue<T> *queue) {
-            m_underConstruction.m_queue = queue;
+        PackageBuilder &with_queue(std::weak_ptr<IIndexedQueue<RequeingPackage> > queue) {
+            m_underConstruction.m_queue = std::move(queue);
             return *this;
         }
 
         RequeingPackage &&build() {
-            PRECONDITION(m_underConstruction.m_queue.expired(), "Queue is null");
+            PRECONDITION(!m_underConstruction.m_queue.expired(), "Queue is null");
             return std::move(m_underConstruction);
         }
 
@@ -74,8 +74,10 @@ public:
     }
 
     ~RequeingPackage() {
-        if (auto queue_instance = m_queue.lock()) {
-            queue_instance->enqueue(std::move(*this));
+        if (!m_is_empty) {
+            if (auto queue_instance = m_queue.lock()) {
+                queue_instance->enqueue(std::move(*this));
+            }
         }
     }
 

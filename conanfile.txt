@@ -1,6 +1,9 @@
 [requires]
 plog/1.1.10
 
+[test_requires]
+gtest/1.15.0
+
 [generators]
 CMakeToolchain
 CMakeDeps

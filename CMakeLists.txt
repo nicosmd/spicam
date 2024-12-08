@@ -37,3 +37,7 @@ target_sources(v4l2_utils PRIVATE
 set_property(TARGET v4l2_utils PROPERTY CXX_STANDARD 23)
 
 add_subdirectory(apps)
+
+if(NOT BUILD_TESTING STREQUAL OFF)
+    add_subdirectory(tests)
+endif()
